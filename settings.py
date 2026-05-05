@@ -1,0 +1,3 @@
+WIDTH = 1440
+HEIGTH = 720
+
