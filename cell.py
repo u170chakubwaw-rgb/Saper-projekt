@@ -1,13 +1,19 @@
 from tkinter import Button
+from tkinter import Label
 import random
 import settings
-
+import ctypes
+import sys
 
 
 class Cell:
     all = []
+    cell_count = settings.CELL_COUNT
+    cell_count_label_object = None
     def __init__(self,x,y, is_mine=False):
         self.is_mine = is_mine
+        self.is_opened = False
+        self.is_mine_candidate = False
         self.cell_btn_object = None
         self.x = x
         self.y = y
@@ -29,16 +35,33 @@ class Cell:
 
 
 
+    @staticmethod
+    def create_cell_count_label(location):
+        lbl = Label(
+            location,
+            bg = 'black',
+            fg = 'white',
+            text=f'Cell left:{settings.CELL_COUNT}',
+            font=('Comic Sans', 34),
+        )
+        Cell.cell_count_label_object = lbl
+
+
+
 
     def left_click_actions(self, event):
+        if self.is_mine_candidate or self.is_opened:
+            return
         if self.is_mine:
             self.show_mine()
         else:
-
             if self.surrounded_cells_mines_length() == 0:
                 for cell_obj in self.surrounded_cells:
                     cell_obj.show_cell()
             self.show_cell()
+            #jesli mines count bedzie rowny cells left count, gracz wygrywa
+            if Cell.cell_count == settings.MINES_COUNT:
+                ctypes.windll.user32.MessageBoxW(0, 'Wygrałeś grę', 'Gratulację', 0)
 
 
 
@@ -78,23 +101,45 @@ class Cell:
                 counter += 1
         return counter
 
-
-
     def show_cell(self):
-        self.cell_btn_object.configure(text = self.surrounded_cells_mines_length())
+        if not self.is_opened:
+            Cell.cell_count -= 1
+            self.cell_btn_object.configure(text=self.surrounded_cells_mines_length())
+            #podmieniony tekst uzywajac zmiennej Cell.cell_count a nie stałej z settings
+            if Cell.cell_count_label_object:
+                Cell.cell_count_label_object.configure(
+                    text=f"Cells left: {Cell.cell_count}"
+                )
+            #jesli to by bylo mine_candidate to dla bezpiecznosci zmienmy kolor na systemButtoFace
 
+        self.cell_btn_object.configure(bg='SystemButtonFace')
 
-
+        self.is_opened = True
 
     def show_mine(self):
-        #display message that player lost
+        #wyswietl informacje że gracz przegrał gre
         self.cell_btn_object.configure(bg='red')
+        ctypes.windll.user32.MessageBoxW(0, 'Kliknąłeś na minę', 'PRZEGRAŁEŚ',0)
+        sys.exit()
 
 
 
+#prway przycisk klikniecie robi flage
     def right_click_actions(self, event):
-        print(event)
-        print("I am right clicked!")
+        if self.is_opened:
+            return
+
+        if not self.is_mine_candidate:
+            self.cell_btn_object.configure(
+                bg='orange',
+            )
+            self.is_mine_candidate = True
+
+        else:
+            self.cell_btn_object.configure(
+                bg='SystemButtonFace',
+            )
+            self.is_mine_candidate = False
 
 
 

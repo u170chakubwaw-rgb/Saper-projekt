@@ -19,6 +19,16 @@ top_frame = Frame(root,
                   height=height_prct(25))
 top_frame.place(x=0 ,y=0)
 
+game_title = Label(
+    top_frame,
+    bg='black',
+    fg='white',
+    text='Gra w Sapera!!!!!!!!',
+    font=('', 48)
+
+)
+
+game_title.place(x=utils.width_prct(25), y=34 )
 
 
 left_frame = Frame(root,
@@ -59,7 +69,12 @@ center_frame.place(
     x=utils.width_prct(25),
     y=utils.height_prct(25))
 
+#wywolaj liste all z klasy Cell
+Cell.create_cell_count_label(left_frame)
+Cell.cell_count_label_object.place(x =0, y=0)
+
 Cell.randomize_mines()
+
 #run the window
 root.mainloop()
 
